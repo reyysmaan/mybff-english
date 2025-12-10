@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBFF - English Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE VARIABLES & RESET --- */
+        :root {
+            --primary: #FF8A65; /* Salmon/Friendly Orange */
+            --primary-dark: #E64A19;
+            --accent: #4FC3F7;   /* Sky Blue */
+            --bg-gradient: linear-gradient(135deg, #FFF3E0 0%, #E1F5FE 100%);
+            --chat-bg: #ffffff;
+            --user-bubble: #4FC3F7;
+            --bot-bubble: #ffffff;
+            --font-main: 'Nunito', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-main);
+            background: var(--bg-gradient);
+            overflow: hidden;
+            user-select: none; /* Prevent selection for app-like feel */
+        }
+
+        /* --- SMARTPHONE CHASSIS --- */
+        .phone-chassis {
+            width: 375px;
+            height: 85vh;
+            max-height: 812px;
+            background: #37474F;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3), 0 0 0 2px #263238;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Notch & Buttons */
+        .notch {
+            height: 25px; width: 140px; background: #37474F;
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;
+            z-index: 10;
+        }
+        .side-btn { position: absolute; background: #263238; border-radius: 2px; }
+        .side-btn.vol { width: 3px; height: 50px; left: -3px; top: 100px; }
+        .side-btn.pwr { width: 3px; height: 30px; right: -3px; top: 130px; }
+
+        /* --- SCREEN --- */
+        .screen {
+            background: #FAFAFA;
+            width: 100%; height: 100%;
+            border-radius: 32px;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            position: relative;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            padding: 40px 20px 15px 20px;
+            background: rgba(255,255,255,0.95);
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 5;
+        }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary-dark); display: flex; align-items: center; gap: 5px; }
+        .kamus-btn {
+            background: #ECEFF1; border: none; padding: 6px 12px;
+            border-radius: 20px; font-weight: 700; color: #546E7A;
+            font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px;
+        }
+        .kamus-btn:hover { background: #CFD8DC; }
+
+        /* --- CHAT AREA --- */
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
+            scroll-behavior: smooth;
+        }
+        .chat-container::-webkit-scrollbar { width: 5px; }
+        .chat-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+        .msg {
+            max-width: 80%; padding: 12px 16px;
+            border-radius: 18px; font-size: 0.95rem; line-height: 1.4;
+            position: relative; animation: slideUp 0.3s ease-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .msg.bot {
+            background: var(--bot-bubble); color: #333; align-self: flex-start;
+            border-bottom-left-radius: 4px; border: 1px solid #ECEFF1;
+        }
+        .msg.user {
+            background: var(--user-bubble); color: white; align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .msg.sys {
+            align-self: center; background: #FFF3E0; color: #E64A19;
+            font-size: 0.8rem; font-weight: 700; padding: 5px 15px;
+            border-radius: 20px; margin: 10px 0;
+        }
+
+        /* --- INTERACTION ZONE --- */
+        .controls {
+            background: white; border-top: 1px solid #ECEFF1;
+            padding: 15px 20px 25px 20px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Instruction Card */
+        .helper-card {
+            width: 100%; background: #FFF8E1;
+            border: 1px solid #FFE082; border-radius: 12px;
+            padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .helper-text { font-size: 0.9rem; color: #FF6F00; font-weight: 700; }
+        .sound-btn {
+            background: white; border: 1px solid #FFCA28;
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: #FF6F00; cursor: pointer; font-size: 1rem;
+        }
+
+        /* Mic Button */
+        .mic-wrapper { position: relative; width: 70px; height: 70px; }
+        .mic-btn {
+            width: 100%; height: 100%; border-radius: 50%; border: none;
+            background: linear-gradient(135deg, #FF7043, #F4511E);
+            color: white; font-size: 28px; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(244, 81, 30, 0.4);
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.2s; position: relative; z-index: 2;
+        }
+        .mic-btn:active { transform: scale(0.95); }
+        
+        .mic-ripple {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 50%; background: #FF7043; z-index: 1;
+            opacity: 0;
+        }
+        .mic-btn.listening + .mic-ripple { animation: ripple 1.5s infinite; }
+        
+        .status { font-size: 0.8rem; color: #90A4AE; min-height: 18px; }
+
+        /* --- MENUS & OVERLAYS --- */
+        .topic-menu {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            width: 100%; padding-bottom: 20px;
+        }
+        .topic-card {
+            background: white; border: 2px solid #ECEFF1;
+            border-radius: 16px; padding: 15px; text-align: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .topic-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .t-icon { font-size: 2rem; display: block; margin-bottom: 5px; }
+        .t-name { font-size: 0.9rem; font-weight: 700; color: #455A64; }
+
+        /* Dictionary Modal */
+        .modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
+            z-index: 50; display: none; flex-direction: column; justify-content: flex-end;
+        }
+        .sheet {
+            background: white; border-top-left-radius: 25px; border-top-right-radius: 25px;
+            padding: 25px; min-height: 60%; animation: slideUp 0.3s;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .search-bar {
+            width: 100%; padding: 12px; border: 2px solid #ECEFF1;
+            border-radius: 12px; font-size: 1rem; outline: none; box-sizing: border-box;
+        }
+        .dict-results {
+            flex: 1; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 10px; padding: 10px;
+        }
+        .word-row { padding: 10px; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; }
+        .word-en { font-weight: 700; color: var(--primary-dark); }
+        .word-my { color: #555; }
+        .close-btn {
+            background: #CFD8DC; border: none; padding: 12px;
+            border-radius: 12px; font-weight: 700; cursor: pointer; color: #455A64;
+        }
+
+        /* Animations */
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes ripple { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.6); opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+<div class="phone-chassis">
+    <div class="side-btn vol"></div><div class="side-btn pwr"></div>
+    <div class="notch"></div>
+    
+    <div class="screen">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">✨ MyBFF</div>
+            <button class="kamus-btn" onclick="toggleDict()">📖 Kamus</button>
+        </div>
+
+        <!-- Chat Scroll Area -->
+        <div class="chat-container" id="chatbox"></div>
+
+        <!-- Controls -->
+        <div class="controls" id="controls">
+            <div class="helper-card" id="helperCard">
+                <span class="helper-text" id="hintText">Welcome!</span>
+                <button class="sound-btn" onclick="playHint()">🔊</button>
+            </div>
+            
+            <div class="mic-wrapper">
+                <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎙️</button>
+                <div class="mic-ripple"></div>
+            </div>
+            <div class="status" id="status">Tap mic to speak</div>
+        </div>
+    </div>
+
+    <!-- Dictionary Modal -->
+    <div class="modal" id="dictModal">
+        <div class="sheet">
+            <h3 style="margin:0; color:#37474F;">English - Malay Dictionary</h3>
+            <input type="text" class="search-bar" id="dictSearch" placeholder="Search word..." onkeyup="filterDict()">
+            <div class="dict-results" id="dictList">
+                <!-- Word list injected here -->
+            </div>
+            <button class="close-btn" onclick="toggleDict()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* =========================================
+   1. EXTENSIVE DATA BANKS
+   ========================================= */
+
+// --- DICTIONARY (300+ Common Words) ---
+const rawDict = {
+    // Basics
+    "I": "Saya", "you": "Awak", "he": "Dia (L)", "she": "Dia (P)", "we": "Kami", "they": "Mereka",
+    "my": "Saya punya", "your": "Awak punya", "name": "Nama", "is": "Ialah/Adalah", "am": "Ialah/Adalah",
+    "yes": "Ya", "no": "Tidak", "please": "Tolong", "thank you": "Terima kasih", "sorry": "Maaf",
+    "hello": "Helo", "goodbye": "Selamat tinggal", "good": "Bagus", "bad": "Teruk",
+    // Family & People
+    "mother": "Ibu", "father": "Bapa", "sister": "Kakak/Adik(P)", "brother": "Abang/Adik(L)",
+    "friend": "Kawan", "baby": "Bayi", "teacher": "Cikgu", "student": "Murid", "boy": "Budak lelaki", "girl": "Budak perempuan",
+    // School
+    "school": "Sekolah", "class": "Kelas", "book": "Buku", "pen": "Pen", "pencil": "Pensel",
+    "bag": "Beg", "eraser": "Pemadam", "ruler": "Pembaris", "desk": "Meja", "chair": "Kerusi",
+    "read": "Baca", "write": "Tulis", "draw": "Lukis", "homework": "Kerja rumah",
+    // Body
+    "head": "Kepala", "eye": "Mata", "ear": "Telinga", "nose": "Hidung", "mouth": "Mulut",
+    "hand": "Tangan", "leg": "Kaki", "hair": "Rambut", "finger": "Jari",
+    // Food
+    "food": "Makanan", "drink": "Minuman", "water": "Air", "rice": "Nasi", "bread": "Roti",
+    "chicken": "Ayam", "fish": "Ikan", "egg": "Telur", "apple": "Epal", "banana": "Pisang",
+    "orange": "Oren", "milk": "Susu", "cake": "Kek", "ice cream": "Aiskrim", "eat": "Makan", "hungry": "Lapar",
+    // Animals
+    "animal": "Haiwan", "cat": "Kucing", "dog": "Anjing", "bird": "Burung", "cow": "Lembu",
+    "duck": "Itik", "elephant": "Gajah", "tiger": "Harimau", "lion": "Singa", "rabbit": "Arnab",
+    "fish": "Ikan", "snake": "Ular", "monkey": "Monyet",
+    // Colors
+    "color": "Warna", "red": "Merah", "blue": "Biru", "green": "Hijau", "yellow": "Kuning",
+    "black": "Hitam", "white": "Putih", "pink": "Merah jambu", "purple": "Ungu", "orange": "Oren",
+    // Home
+    "home": "Rumah", "kitchen": "Dapur", "bedroom": "Bilik tidur", "bathroom": "Bilik mandi",
+    "living room": "Ruang tamu", "bed": "Katil", "door": "Pintu", "window": "Tingkap", "sleep": "Tidur",
+    // Actions
+    "run": "Lari", "walk": "Jalan", "jump": "Lompat", "sit": "Duduk", "stand": "Berdiri",
+    "play": "Main", "sing": "Nyanyi", "dance": "Menari", "cook": "Masak", "swim": "Berenang",
+    // Feelings
+    "happy": "Gembira", "sad": "Sedih", "angry": "Marah", "tired": "Penat", "scared": "Takut",
+    "love": "Sayang/Cinta", "like": "Suka", "hate": "Benci"
+};
+
+// --- TOPICS & QUESTIONS ---
+// Logic keys: 'pos' (Positive keywords), 'neg' (Negative keywords)
+// Note: Generic verbs (is, are, have) removed from 'pos' to prevent false positives like "I have eras".
+const topicData = [
+    {
+        id: 'myself', icon: '🌟', name: 'Myself',
+        qs: [
+            { q: "How are you today?", ex: "I am happy.", pos: ["happy","good","fine","great","ok","well"], neg: ["sad","bad","tired","sick","bored","angry"], rNeg: "Oh no! I hope you feel better soon." },
+            { q: "How old are you?", ex: "I am ten.", pos: ["6","7","8","9","10","11","12","six","seven","eight","nine","ten","eleven","twelve","years"], neg: [], rNeg: "" },
+            { q: "What is your favorite color?", ex: "I like blue.", pos: ["red","blue","green","yellow","pink","black","white","purple","orange"], neg: ["don't","no"], rNeg: "No favorite color? That's okay!" },
+            { q: "Do you have a hobby?", ex: "Yes, I like reading.", pos: ["read","draw","sing","dance","play","swim","run","sleep","game","football"], neg: ["no","don't","none"], rNeg: "Maybe you can try reading books!" },
+            { q: "Are you a boy or a girl?", ex: "I am a girl.", pos: ["boy","girl","male","female"], neg: [], rNeg: "" },
+            { q: "When is your birthday?", ex: "It is in May.", pos: ["january","february","march","april","may","june","july","august","september","october","november","december"], neg: ["know"], rNeg: "You can ask your mom!" },
+            { q: "Where do you live?", ex: "I live in KL.", pos: ["live","stay","kl","selangor","penang","johor","home","house","apartment"], neg: [], rNeg: "" },
+            { q: "What is your name?", ex: "My name is...", pos: ["name","call","is","am"], neg: [], rNeg: "" }
+        ]
+    },
+    {
+        id: 'family', icon: '👨‍👩‍👧', name: 'Family',
+        qs: [
+            { q: "Do you have brothers?", ex: "Yes, I have one brother.", pos: ["yes","have","one","two","three","brother"], neg: ["no","don't","none","zero"], rNeg: "Okay, maybe you have sisters?" },
+            { q: "What is your mother's name?", ex: "Her name is...", pos: ["name","she","called","mom","mother"], neg: ["know"], rNeg: "It is okay if you forgot." },
+            { q: "Do you love your family?", ex: "Yes, I love them.", pos: ["yes","love","like","much"], neg: ["no","don't"], rNeg: "Family can be difficult sometimes." },
+            { q: "Who cooks in your house?", ex: "My mother cooks.", pos: ["mother","father","mom","dad","cook","grandma"], neg: ["nobody","buy"], rNeg: "Buying food is yummy too!" },
+            { q: "Do you play with your father?", ex: "Yes, we play.", pos: ["yes","play","dad","father","sometimes"], neg: ["no","busy","work"], rNeg: "He must be busy working." },
+            { q: "Is your family big or small?", ex: "It is small.", pos: ["big","small","large","huge"], neg: [], rNeg: "" },
+            { q: "Do you have a baby sister?", ex: "No, I don't.", pos: ["yes","have","baby","sister"], neg: ["no","don't"], rNeg: "Okay, just you then." }
+        ]
+    },
+    {
+        id: 'school', icon: '🏫', name: 'School',
+        qs: [
+            { q: "Do you like school?", ex: "Yes, school is fun.", pos: ["yes","like","love","fun","great"], neg: ["no","hate","boring","bad","tired"], rNeg: "I understand. School can be tiring." },
+            { q: "What is in your bag?", ex: "I have a book.", pos: ["book","pencil","pen","ruler","eraser","rubber","bottle","water","tissue","money"], neg: ["nothing","empty"], rNeg: "Your bag is empty? Wow!" },
+            { q: "What is your teacher's name?", ex: "Her name is...", pos: ["name","mr","ms","mrs","cikgu","teacher"], neg: ["forgot","know"], rNeg: "Don't worry, you can ask tomorrow." },
+            { q: "Do you have homework?", ex: "Yes, I have homework.", pos: ["yes","have","lot","math","english","science"], neg: ["no","none","finished"], rNeg: "Lucky you! No homework today." },
+            { q: "How do you go to school?", ex: "I go by car.", pos: ["car","bus","walk","bicycle","dad","mom","van"], neg: [], rNeg: "" },
+            { q: "What is your favorite subject?", ex: "I like English.", pos: ["english","math","science","art","music","pe","malay","history"], neg: ["none","hate"], rNeg: "Maybe you like recess best!" },
+            { q: "Do you have many friends?", ex: "Yes, I have many.", pos: ["yes","many","lot","friend","friends"], neg: ["no","few","one"], rNeg: "One good friend is enough." }
+        ]
+    },
+    {
+        id: 'food', icon: '🍔', name: 'Food',
+        qs: [
+            { q: "Are you hungry?", ex: "Yes, I am hungry.", pos: ["yes","hungry","starving","famished"], neg: ["no","full","stuffed"], rNeg: "That is good. No need to eat yet." },
+            { q: "Do you like vegetables?", ex: "Yes, I like them.", pos: ["yes","like","love","carrot","spinach"], neg: ["no","yuck","hate","don't"], rNeg: "Vegetables are healthy, but I understand!" },
+            { q: "What is your favorite fruit?", ex: "I like apples.", pos: ["apple","banana","orange","grape","durian","mango","watermelon"], neg: ["none","don't"], rNeg: "Fruits are sweet and yummy." },
+            { q: "Do you drink milk?", ex: "Yes, I drink milk.", pos: ["yes","drink","milk","every","day"], neg: ["no","don't","allergy"], rNeg: "Water is good too." },
+            { q: "Do you like spicy food?", ex: "No, it is hot.", pos: ["yes","like","love","spicy"], neg: ["no","hot","hate","don't"], rNeg: "Spicy food can hurt your tongue!" },
+            { q: "What did you eat for breakfast?", ex: "I ate bread.", pos: ["bread","nasi","lemak","egg","cereal","toast","milk"], neg: ["nothing","none"], rNeg: "Breakfast is important!" },
+            { q: "Can you cook?", ex: "No, I cannot cook.", pos: ["yes","can","cook","egg","rice"], neg: ["no","can't","cannot","small"], rNeg: "You are still young. You can learn later." }
+        ]
+    },
+    {
+        id: 'animals', icon: '🐱', name: 'Animals',
+        qs: [
+            { q: "Do you like cats?", ex: "Yes, cats are cute.", pos: ["yes","like","love","cute","cat"], neg: ["no","hate","scary","allergy"], rNeg: "Some people are allergic to cats." },
+            { q: "What sound does a dog make?", ex: "Woof woof!", pos: ["woof","bark"], neg: [], rNeg: "" },
+            { q: "Have you seen an elephant?", ex: "Yes, at the zoo.", pos: ["yes","zoo","tv","seen"], neg: ["no","never"], rNeg: "They are very big!" },
+            { q: "Are snakes scary?", ex: "Yes, they are scary.", pos: ["yes","scary","dangerous"], neg: ["no","cute","cool"], rNeg: "Wow, you are brave!" },
+            { q: "Do you have a pet?", ex: "Yes, I have a fish.", pos: ["yes","have","cat","dog","fish","bird","hamster"], neg: ["no","don't"], rNeg: "Pets are fun but need work." },
+            { q: "What animal can fly?", ex: "A bird can fly.", pos: ["bird","bat","eagle","owl","parrot","butterfly","bee"], neg: [], rNeg: "" },
+            { q: "Is a tiger big or small?", ex: "It is big.", pos: ["big","huge","large"], neg: ["small"], rNeg: "Actually, tigers are very big!" }
+        ]
+    },
+    {
+        id: 'home', icon: '🏠', name: 'Home',
+        qs: [
+            { q: "Do you have your own room?", ex: "Yes, I have a room.", pos: ["yes","have","room","bedroom"], neg: ["no","share","sister","brother"], rNeg: "Sharing a room is fun too." },
+            { q: "Is your house clean?", ex: "Yes, it is clean.", pos: ["yes","clean","tidy"], neg: ["no","messy","dirty"], rNeg: "Time to clean up!" },
+            { q: "What color is your house?", ex: "It is white.", pos: ["white","blue","yellow","grey","cream","brown","red"], neg: [], rNeg: "" },
+            { q: "Do you help clean the house?", ex: "Yes, I help.", pos: ["yes","help","sweep","wash"], neg: ["no","lazy","busy"], rNeg: "You should help your parents!" },
+            { q: "Is there a TV in your house?", ex: "Yes, in the living room.", pos: ["yes","have","tv","television"], neg: ["no"], rNeg: "That is okay. Reading is better." }
+        ]
+    },
+    {
+        id: 'actions', icon: '🏃', name: 'Actions',
+        qs: [
+            { q: "Can you run fast?", ex: "Yes, I am fast.", pos: ["yes","can","run","fast"], neg: ["no","slow"], rNeg: "It is okay to be slow." },
+            { q: "Do you like to dance?", ex: "Yes, I like dancing.", pos: ["yes","like","dance","dancing"], neg: ["no","shy","don't"], rNeg: "Don't be shy!" },
+            { q: "Can you swim?", ex: "Yes, I can swim.", pos: ["yes","can","swim","pool"], neg: ["no","can't","drown"], rNeg: "Be careful near water." },
+            { q: "Show me how you sleep.", ex: "I close my eyes.", pos: ["close","eyes","snore","sleep","bed"], neg: [], rNeg: "" },
+            { q: "Do you play football?", ex: "Yes, I play.", pos: ["yes","play","football","ball"], neg: ["no","don't"], rNeg: "Sports are good for you." }
+        ]
+    }
+];
+
+// --- APP STATE ---
+let currentState = 'intro'; // intro, menu, topic
+let currentTopicId = null;
+let questionDeck = []; // Array of indices for current topic
+let currentQ = null;
+let introStep = 0;
+let isListening = false;
+let recognition;
+let synth = window.speechSynthesis;
+let voices = [];
+
+// --- UTILS ---
+const getEl = (id) => document.getElementById(id);
+const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+// --- INITIALIZATION ---
+window.onload = function() {
+    loadVoices();
+    renderDictionary();
+    // Auto-start intro
+    setTimeout(startIntro, 1000);
+};
+
+function loadVoices() {
+    voices = synth.getVoices();
+    if(speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = () => { voices = synth.getVoices(); };
+    }
+}
+
+// --- CORE LOGIC ---
+
+function speak(text) {
+    if (synth.speaking) synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    // Friendly Female Voice Logic
+    const preferred = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
+    if (preferred) u.voice = preferred;
+    u.pitch = 1.1; // Friendly
+    u.rate = 0.9;  // Clear
+    synth.speak(u);
+}
+
+function addMsg(text, type) {
+    const box = getEl('chatbox');
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.innerText = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    if (type === 'bot') speak(text);
+}
+
+// --- GAME FLOW ---
+
+function startIntro() {
+    // --- UPDATED INTRO HERE ---
+    const introQs = [
+        { q: "Hello! I am Mr Reyy's assistant. What is your name?", ex: "My name is...", key: ["name","is","am","call"], loose: true },
+        { q: "Nice to meet you! How are you?", ex: "I am happy.", key: ["happy","good","great","sad","ok","fine"], loose: true },
+        { q: "You sound awesome. How old are you?", ex: "I am ten.", key: ["6","7","8","9","10","11","12","six","seven","eight","nine","ten","years"], loose: false }
+    ];
+    
+    if (introStep < introQs.length) {
+        currentQ = introQs[introStep];
+        // For intro, we fake the object structure slightly
+        currentQ.pos = currentQ.key; 
+        currentQ.neg = []; 
+        
+        addMsg(currentQ.q, 'bot');
+        getEl('hintText').innerText = currentQ.ex;
+    } else {
+        showMenu();
+    }
+}
+
+function showMenu() {
+    currentState = 'menu';
+    getEl('controls').style.transform = "translateY(100px)"; // Hide controls slightly
+    
+    const box = getEl('chatbox');
+    const menuDiv = document.createElement('div');
+    menuDiv.className = 'topic-menu';
+    
+    topicData.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'topic-card';
+        card.innerHTML = `<span class="t-icon">${t.icon}</span><span class="t-name">${t.name}</span>`;
+        card.onclick = () => loadTopic(t);
+        menuDiv.appendChild(card);
+    });
+    
+    const label = document.createElement('div');
+    label.className = 'msg sys';
+    label.innerText = "Choose a topic below:";
+    
+    box.appendChild(label);
+    box.appendChild(menuDiv);
+    box.scrollTop = box.scrollHeight;
+    speak("Please choose a topic.");
+}
+
+function loadTopic(topic) {
+    currentState = 'topic';
+    currentTopicId = topic;
+    getEl('controls').style.transform = "translateY(0)"; // Show controls
+    
+    // Shuffle questions logic
+    questionDeck = [...Array(topic.qs.length).keys()];
+    // Simple shuffle
+    questionDeck.sort(() => Math.random() - 0.5);
+    
+    addMsg(`Let's talk about ${topic.name}!`, 'bot');
+    setTimeout(nextQuestion, 1500);
+}
+
+function nextQuestion() {
+    if (questionDeck.length === 0) {
+        addMsg("🏆 Amazing! You finished this topic!", 'bot');
+        setTimeout(showMenu, 3000);
+        return;
+    }
+    
+    const idx = questionDeck.pop();
+    currentQ = currentTopicId.qs[idx];
+    
+    addMsg(currentQ.q, 'bot');
+    getEl('hintText').innerText = currentQ.ex;
+}
+
+// --- INPUT & VALIDATION ---
+
+function toggleMic() {
+    if (!recognition) initSpeech();
+    if (!recognition) return;
+    
+    if (isListening) recognition.stop();
+    else recognition.start();
+}
+
+function initSpeech() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert("Please use Google Chrome."); return; }
+    recognition = new SR();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    
+    recognition.onstart = () => {
+        isListening = true;
+        getEl('micBtn').classList.add('listening');
+        getEl('status').innerText = "Listening...";
+        getEl('status').style.color = "#FF7043";
+    };
+    
+    recognition.onend = () => {
+        isListening = false;
+        getEl('micBtn').classList.remove('listening');
+        getEl('status').innerText = "Processing...";
+        getEl('status').style.color = "#FBC02D"; // Yellow processing
+    };
+    
+    recognition.onresult = (e) => processResult(e.results[0][0].transcript);
+}
+
+async function processResult(text) {
+    addMsg(text, 'user');
+    getEl('status').innerText = "Tap mic to speak";
+    getEl('status').style.color = "#90A4AE";
+
+    const lower = text.toLowerCase();
+    
+    // 1. Check Negative Context (Fluency Pass)
+    const isNeg = currentQ.neg.some(k => lower.includes(k));
+    if (isNeg) {
+        // Empathetic response
+        await delay(500);
+        addMsg(currentQ.rNeg || "I understand.", 'bot');
+        await delay(2000);
+        advance();
+        return;
+    }
+    
+    // 2. Check Positive Context (Accuracy Pass)
+    let isPos = false;
+    if (currentQ.loose) {
+        isPos = text.length > 2; // For name intro
+    } else {
+        isPos = currentQ.pos.some(k => lower.includes(k));
+    }
+    
+    if (isPos) {
+        await delay(500);
+        const praises = ["Good job!", "Very nice!", "Excellent!", "Clear voice!", "Super!"];
+        const randPraise = praises[Math.floor(Math.random() * praises.length)];
+        addMsg(randPraise, 'bot');
+        await delay(2000);
+        advance();
+    } else {
+        await delay(500);
+        addMsg("Almost! Try saying: " + currentQ.ex, 'bot');
+        // Do not advance, must retry
+    }
+}
+
+function advance() {
+    if (currentState === 'intro') {
+        introStep++;
+        startIntro();
+    } else {
+        nextQuestion();
+    }
+}
+
+// --- DICTIONARY ---
+
+function toggleDict() {
+    const m = getEl('dictModal');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function renderDictionary() {
+    const list = getEl('dictList');
+    list.innerHTML = '';
+    // Sort keys alphabetically
+    Object.keys(rawDict).sort().forEach(en => {
+        const row = document.createElement('div');
+        row.className = 'word-row';
+        row.innerHTML = `<span class="word-en">${en}</span><span class="word-my">${rawDict[en]}</span>`;
+        list.appendChild(row);
+    });
+}
+
+function filterDict() {
+    const term = getEl('dictSearch').value.toLowerCase();
+    const rows = document.querySelectorAll('.word-row');
+    rows.forEach(r => {
+        const txt = r.innerText.toLowerCase();
+        r.style.display = txt.includes(term) ? 'flex' : 'none';
+    });
+}
+
+function playHint() {
+    speak(getEl('hintText').innerText);
+}
+
+</script>
+</body>
+</html>
