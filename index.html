@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MyBFF - English Buddy</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -26,11 +26,12 @@
             align-items: center;
             font-family: var(--font-main);
             background: var(--bg-gradient);
-            overflow: hidden;
-            user-select: none; /* Prevent selection for app-like feel */
+            overflow: hidden; /* Fixed by media query below for mobile */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- SMARTPHONE CHASSIS --- */
+        /* --- SMARTPHONE CHASSIS (Desktop View) --- */
         .phone-chassis {
             width: 375px;
             height: 85vh;
@@ -42,9 +43,10 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
         }
 
-        /* Notch & Buttons */
+        /* Notch & Buttons (Desktop Only) */
         .notch {
             height: 25px; width: 140px; background: #37474F;
             position: absolute; top: 0; left: 50%; transform: translateX(-50%);
@@ -65,13 +67,35 @@
             position: relative;
         }
 
+        /* --- MOBILE OPTIMIZATION (THE FIX) --- */
+        @media (max-width: 480px) {
+            body {
+                background: #FAFAFA;
+            }
+            .phone-chassis {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+            .notch, .side-btn {
+                display: none; /* Hide decorative elements on real phones */
+            }
+            .screen {
+                border-radius: 0;
+            }
+        }
+
         /* --- HEADER --- */
         .header {
-            padding: 40px 20px 15px 20px;
-            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.98);
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             z-index: 5;
+            height: 60px;
+            box-sizing: border-box;
         }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary-dark); display: flex; align-items: center; gap: 5px; }
         .kamus-btn {
@@ -79,7 +103,6 @@
             border-radius: 20px; font-weight: 700; color: #546E7A;
             font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px;
         }
-        .kamus-btn:hover { background: #CFD8DC; }
 
         /* --- CHAT AREA --- */
         .chat-container {
@@ -88,15 +111,16 @@
             overflow-y: auto;
             display: flex; flex-direction: column; gap: 15px;
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
         }
-        .chat-container::-webkit-scrollbar { width: 5px; }
-        .chat-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        /* Hide scrollbar but keep functionality */
+        .chat-container::-webkit-scrollbar { display: none; }
 
         .msg {
             max-width: 80%; padding: 12px 16px;
-            border-radius: 18px; font-size: 0.95rem; line-height: 1.4;
+            border-radius: 18px; font-size: 1rem; line-height: 1.4;
             position: relative; animation: slideUp 0.3s ease-out;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .msg.bot {
             background: var(--bot-bubble); color: #333; align-self: flex-start;
@@ -108,7 +132,7 @@
         }
         .msg.sys {
             align-self: center; background: #FFF3E0; color: #E64A19;
-            font-size: 0.8rem; font-weight: 700; padding: 5px 15px;
+            font-size: 0.85rem; font-weight: 700; padding: 5px 15px;
             border-radius: 20px; margin: 10px 0;
         }
 
@@ -120,26 +144,25 @@
             transition: transform 0.3s ease;
         }
 
-        /* Instruction Card */
         .helper-card {
             width: 100%; background: #FFF8E1;
             border: 1px solid #FFE082; border-radius: 12px;
             padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+            box-sizing: border-box;
         }
         .helper-text { font-size: 0.9rem; color: #FF6F00; font-weight: 700; }
         .sound-btn {
             background: white; border: 1px solid #FFCA28;
-            width: 32px; height: 32px; border-radius: 50%;
+            width: 35px; height: 35px; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            color: #FF6F00; cursor: pointer; font-size: 1rem;
+            color: #FF6F00; cursor: pointer; font-size: 1.1rem;
         }
 
-        /* Mic Button */
-        .mic-wrapper { position: relative; width: 70px; height: 70px; }
+        .mic-wrapper { position: relative; width: 75px; height: 75px; }
         .mic-btn {
             width: 100%; height: 100%; border-radius: 50%; border: none;
             background: linear-gradient(135deg, #FF7043, #F4511E);
-            color: white; font-size: 28px; cursor: pointer;
+            color: white; font-size: 30px; cursor: pointer;
             box-shadow: 0 8px 20px rgba(244, 81, 30, 0.4);
             display: flex; justify-content: center; align-items: center;
             transition: all 0.2s; position: relative; z-index: 2;
@@ -153,11 +176,11 @@
         }
         .mic-btn.listening + .mic-ripple { animation: ripple 1.5s infinite; }
         
-        .status { font-size: 0.8rem; color: #90A4AE; min-height: 18px; }
+        .status { font-size: 0.85rem; color: #90A4AE; min-height: 20px; }
 
-        /* --- MENUS & OVERLAYS --- */
+        /* --- MENUS --- */
         .topic-menu {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
             width: 100%; padding-bottom: 20px;
         }
         .topic-card {
@@ -165,20 +188,20 @@
             border-radius: 16px; padding: 15px; text-align: center;
             cursor: pointer; transition: all 0.2s;
         }
-        .topic-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .t-icon { font-size: 2rem; display: block; margin-bottom: 5px; }
-        .t-name { font-size: 0.9rem; font-weight: 700; color: #455A64; }
+        .t-icon { font-size: 2.2rem; display: block; margin-bottom: 5px; }
+        .t-name { font-size: 0.95rem; font-weight: 700; color: #455A64; }
 
-        /* Dictionary Modal */
+        /* --- DICT MODAL --- */
         .modal {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
             z-index: 50; display: none; flex-direction: column; justify-content: flex-end;
         }
         .sheet {
             background: white; border-top-left-radius: 25px; border-top-right-radius: 25px;
-            padding: 25px; min-height: 60%; animation: slideUp 0.3s;
+            padding: 25px; height: 70%; animation: slideUp 0.3s;
             display: flex; flex-direction: column; gap: 15px;
+            box-sizing: border-box;
         }
         .search-bar {
             width: 100%; padding: 12px; border: 2px solid #ECEFF1;
@@ -187,31 +210,28 @@
         .dict-results {
             flex: 1; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 10px; padding: 10px;
         }
-        .word-row { padding: 10px; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; }
-        .word-en { font-weight: 700; color: var(--primary-dark); }
-        .word-my { color: #555; }
+        .word-row { padding: 12px; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; }
+        .word-en { font-weight: 700; color: var(--primary-dark); font-size: 1.1rem; }
+        .word-my { color: #555; font-size: 1.1rem; }
         .close-btn {
-            background: #CFD8DC; border: none; padding: 12px;
-            border-radius: 12px; font-weight: 700; cursor: pointer; color: #455A64;
+            background: #CFD8DC; border: none; padding: 15px;
+            border-radius: 15px; font-weight: 700; cursor: pointer; color: #455A64; font-size: 1rem;
         }
 
-        /* --- START OVERLAY (FIX) --- */
         .start-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 243, 224, 0.95); z-index: 100;
+            background: rgba(255, 243, 224, 1); z-index: 100;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            border-radius: 32px;
         }
         .start-btn {
-            padding: 15px 40px; font-size: 1.5rem;
+            padding: 20px 50px; font-size: 1.5rem;
             background: var(--primary); color: white; border: none;
             border-radius: 50px; cursor: pointer; font-weight: 800;
             box-shadow: 0 5px 15px rgba(255, 138, 101, 0.4);
             animation: pulse 2s infinite;
         }
 
-        /* Animations */
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes ripple { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.6); opacity: 0; } }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
@@ -224,22 +244,18 @@
     <div class="notch"></div>
     
     <div class="screen">
-        <!-- START SCREEN OVERLAY (NEW) -->
         <div class="start-overlay" id="startScreen">
             <h1 style="color:var(--primary-dark); margin-bottom:20px;">👋 Ready?</h1>
             <button class="start-btn" onclick="beginExperience()">Start Class</button>
         </div>
 
-        <!-- Header -->
         <div class="header">
             <div class="logo">✨ MyBFF</div>
             <button class="kamus-btn" onclick="toggleDict()">📖 Kamus</button>
         </div>
 
-        <!-- Chat Scroll Area -->
         <div class="chat-container" id="chatbox"></div>
 
-        <!-- Controls -->
         <div class="controls" id="controls">
             <div class="helper-card" id="helperCard">
                 <span class="helper-text" id="hintText">Welcome!</span>
@@ -254,77 +270,53 @@
         </div>
     </div>
 
-    <!-- Dictionary Modal -->
     <div class="modal" id="dictModal">
         <div class="sheet">
             <h3 style="margin:0; color:#37474F;">English - Malay Dictionary</h3>
             <input type="text" class="search-bar" id="dictSearch" placeholder="Search word..." onkeyup="filterDict()">
-            <div class="dict-results" id="dictList">
-                <!-- Word list injected here -->
-            </div>
+            <div class="dict-results" id="dictList"></div>
             <button class="close-btn" onclick="toggleDict()">Close</button>
         </div>
     </div>
 </div>
 
 <script>
-/* =========================================
-   1. EXTENSIVE DATA BANKS
-   ========================================= */
-
-// --- DICTIONARY (300+ Common Words) ---
+// --- DICTIONARY ---
 const rawDict = {
-    // Basics
     "I": "Saya", "you": "Awak", "he": "Dia (L)", "she": "Dia (P)", "we": "Kami", "they": "Mereka",
-    "my": "Saya punya", "your": "Awak punya", "name": "Nama", "is": "Ialah/Adalah", "am": "Ialah/Adalah",
+    "my": "Saya punya", "your": "Awak punya", "name": "Nama", "is": "Ialah", "am": "Ialah",
     "yes": "Ya", "no": "Tidak", "please": "Tolong", "thank you": "Terima kasih", "sorry": "Maaf",
     "hello": "Helo", "goodbye": "Selamat tinggal", "good": "Bagus", "bad": "Teruk",
-    // Family & People
     "mother": "Ibu", "father": "Bapa", "sister": "Kakak/Adik(P)", "brother": "Abang/Adik(L)",
-    "friend": "Kawan", "baby": "Bayi", "teacher": "Cikgu", "student": "Murid", "boy": "Budak lelaki", "girl": "Budak perempuan",
-    // School
+    "friend": "Kawan", "baby": "Bayi", "teacher": "Cikgu", "student": "Murid",
     "school": "Sekolah", "class": "Kelas", "book": "Buku", "pen": "Pen", "pencil": "Pensel",
     "bag": "Beg", "eraser": "Pemadam", "ruler": "Pembaris", "desk": "Meja", "chair": "Kerusi",
     "read": "Baca", "write": "Tulis", "draw": "Lukis", "homework": "Kerja rumah",
-    // Body
     "head": "Kepala", "eye": "Mata", "ear": "Telinga", "nose": "Hidung", "mouth": "Mulut",
-    "hand": "Tangan", "leg": "Kaki", "hair": "Rambut", "finger": "Jari",
-    // Food
     "food": "Makanan", "drink": "Minuman", "water": "Air", "rice": "Nasi", "bread": "Roti",
     "chicken": "Ayam", "fish": "Ikan", "egg": "Telur", "apple": "Epal", "banana": "Pisang",
-    "orange": "Oren", "milk": "Susu", "cake": "Kek", "ice cream": "Aiskrim", "eat": "Makan", "hungry": "Lapar",
-    // Animals
     "animal": "Haiwan", "cat": "Kucing", "dog": "Anjing", "bird": "Burung", "cow": "Lembu",
-    "duck": "Itik", "elephant": "Gajah", "tiger": "Harimau", "lion": "Singa", "rabbit": "Arnab",
-    "fish": "Ikan", "snake": "Ular", "monkey": "Monyet",
-    // Colors
+    "elephant": "Gajah", "tiger": "Harimau", "lion": "Singa", "rabbit": "Arnab",
     "color": "Warna", "red": "Merah", "blue": "Biru", "green": "Hijau", "yellow": "Kuning",
-    "black": "Hitam", "white": "Putih", "pink": "Merah jambu", "purple": "Ungu", "orange": "Oren",
-    // Home
+    "black": "Hitam", "white": "Putih", "pink": "Merah jambu", "purple": "Ungu",
     "home": "Rumah", "kitchen": "Dapur", "bedroom": "Bilik tidur", "bathroom": "Bilik mandi",
-    "living room": "Ruang tamu", "bed": "Katil", "door": "Pintu", "window": "Tingkap", "sleep": "Tidur",
-    // Actions
     "run": "Lari", "walk": "Jalan", "jump": "Lompat", "sit": "Duduk", "stand": "Berdiri",
     "play": "Main", "sing": "Nyanyi", "dance": "Menari", "cook": "Masak", "swim": "Berenang",
-    // Feelings
     "happy": "Gembira", "sad": "Sedih", "angry": "Marah", "tired": "Penat", "scared": "Takut",
     "love": "Sayang/Cinta", "like": "Suka", "hate": "Benci"
 };
 
-// --- TOPICS & QUESTIONS ---
-// Logic keys: 'pos' (Positive keywords), 'neg' (Negative keywords)
-// Note: Generic verbs (is, are, have) removed from 'pos' to prevent false positives like "I have eras".
+// --- TOPICS ---
 const topicData = [
     {
         id: 'myself', icon: '🌟', name: 'Myself',
         qs: [
-            { q: "How are you today?", ex: "I am happy.", pos: ["happy","good","fine","great","ok","well"], neg: ["not fine","sad","bad","tired","sick","bored","angry"], rNeg: "Oh no! I hope you feel better soon." },
+            { q: "How are you today?", ex: "I am happy.", pos: ["happy","good","fine","great","ok","well"], neg: ["sad","bad","tired","sick","bored","angry"], rNeg: "Oh no! I hope you feel better soon." },
             { q: "How old are you?", ex: "I am ten.", pos: ["6","7","8","9","10","11","12","six","seven","eight","nine","ten","eleven","twelve","years"], neg: [], rNeg: "" },
-            { q: "What is your favorite color?", ex: "I like blue.", pos: ["red","blue","green","yellow","pink","black","white","purple","orange"], neg: ["don't","no","don't know"], rNeg: "No favorite color? That's okay!" },
+            { q: "What is your favorite color?", ex: "I like blue.", pos: ["red","blue","green","yellow","pink","black","white","purple","orange"], neg: ["don't","no"], rNeg: "No favorite color? That's okay!" },
             { q: "Do you have a hobby?", ex: "Yes, I like reading.", pos: ["read","draw","sing","dance","play","swim","run","sleep","game","football"], neg: ["no","don't","none"], rNeg: "Maybe you can try reading books!" },
             { q: "Are you a boy or a girl?", ex: "I am a girl.", pos: ["boy","girl","male","female"], neg: [], rNeg: "" },
-            { q: "When is your birthday?", ex: "It is in May.", pos: ["january","february","march","april","may","june","july","august","september","october","november","december"], neg: ["don't know"], rNeg: "You can ask your mom!" },
-            { q: "Where do you live?", ex: "I live in Putrajaya.", pos: ["live","stay","putrajaya","selangor","dengkil","johor","home","seruling","apartment"], neg: [], rNeg: "" },
+            { q: "Where do you live?", ex: "I live in KL.", pos: ["live","stay","kl","selangor","penang","johor","home","house","apartment"], neg: [], rNeg: "" },
             { q: "What is your name?", ex: "My name is...", pos: ["name","call","is","am"], neg: [], rNeg: "" }
         ]
     },
@@ -336,8 +328,7 @@ const topicData = [
             { q: "Do you love your family?", ex: "Yes, I love them.", pos: ["yes","love","like","much"], neg: ["no","don't"], rNeg: "Family can be difficult sometimes." },
             { q: "Who cooks in your house?", ex: "My mother cooks.", pos: ["mother","father","mom","dad","cook","grandma"], neg: ["nobody","buy"], rNeg: "Buying food is yummy too!" },
             { q: "Do you play with your father?", ex: "Yes, we play.", pos: ["yes","play","dad","father","sometimes"], neg: ["no","busy","work"], rNeg: "He must be busy working." },
-            { q: "Is your family big or small?", ex: "It is small.", pos: ["big","small","large","huge"], neg: [], rNeg: "" },
-            { q: "Do you have a baby sister?", ex: "No, I don't.", pos: ["yes","have","baby","sister"], neg: ["no","don't"], rNeg: "Okay, just you then." }
+            { q: "Is your family big or small?", ex: "It is small.", pos: ["big","small","large","huge"], neg: [], rNeg: "" }
         ]
     },
     {
@@ -348,8 +339,7 @@ const topicData = [
             { q: "What is your teacher's name?", ex: "Her name is...", pos: ["name","mr","ms","mrs","cikgu","teacher"], neg: ["forgot","know"], rNeg: "Don't worry, you can ask tomorrow." },
             { q: "Do you have homework?", ex: "Yes, I have homework.", pos: ["yes","have","lot","math","english","science"], neg: ["no","none","finished"], rNeg: "Lucky you! No homework today." },
             { q: "How do you go to school?", ex: "I go by car.", pos: ["car","bus","walk","bicycle","dad","mom","van"], neg: [], rNeg: "" },
-            { q: "What is your favorite subject?", ex: "I like English.", pos: ["english","math","science","art","music","pe","malay","history"], neg: ["none","hate"], rNeg: "Maybe you like recess best!" },
-            { q: "Do you have many friends?", ex: "Yes, I have many.", pos: ["yes","many","lot","friend","friends"], neg: ["no","few","one"], rNeg: "One good friend is enough." }
+            { q: "What is your favorite subject?", ex: "I like English.", pos: ["english","math","science","art","music","pe","malay","history"], neg: ["none","hate"], rNeg: "Maybe you like recess best!" }
         ]
     },
     {
@@ -360,8 +350,7 @@ const topicData = [
             { q: "What is your favorite fruit?", ex: "I like apples.", pos: ["apple","banana","orange","grape","durian","mango","watermelon"], neg: ["none","don't"], rNeg: "Fruits are sweet and yummy." },
             { q: "Do you drink milk?", ex: "Yes, I drink milk.", pos: ["yes","drink","milk","every","day"], neg: ["no","don't","allergy"], rNeg: "Water is good too." },
             { q: "Do you like spicy food?", ex: "No, it is hot.", pos: ["yes","like","love","spicy"], neg: ["no","hot","hate","don't"], rNeg: "Spicy food can hurt your tongue!" },
-            { q: "What did you eat for breakfast?", ex: "I ate bread.", pos: ["bread","nasi","lemak","egg","cereal","toast","milk"], neg: ["nothing","none"], rNeg: "Breakfast is important!" },
-            { q: "Can you cook?", ex: "No, I cannot cook.", pos: ["yes","can","cook","egg","rice"], neg: ["no","can't","cannot","small"], rNeg: "You are still young. You can learn later." }
+            { q: "What did you eat for breakfast?", ex: "I ate bread.", pos: ["bread","nasi","lemak","egg","cereal","toast","milk"], neg: ["nothing","none"], rNeg: "Breakfast is important!" }
         ]
     },
     {
@@ -372,8 +361,7 @@ const topicData = [
             { q: "Have you seen an elephant?", ex: "Yes, at the zoo.", pos: ["yes","zoo","tv","seen"], neg: ["no","never"], rNeg: "They are very big!" },
             { q: "Are snakes scary?", ex: "Yes, they are scary.", pos: ["yes","scary","dangerous"], neg: ["no","cute","cool"], rNeg: "Wow, you are brave!" },
             { q: "Do you have a pet?", ex: "Yes, I have a fish.", pos: ["yes","have","cat","dog","fish","bird","hamster"], neg: ["no","don't"], rNeg: "Pets are fun but need work." },
-            { q: "What animal can fly?", ex: "A bird can fly.", pos: ["bird","bat","eagle","owl","parrot","butterfly","bee"], neg: [], rNeg: "" },
-            { q: "Is a tiger big or small?", ex: "It is big.", pos: ["big","huge","large"], neg: ["small"], rNeg: "Actually, tigers are very big!" }
+            { q: "What animal can fly?", ex: "A bird can fly.", pos: ["bird","bat","eagle","owl","parrot","butterfly","bee"], neg: [], rNeg: "" }
         ]
     },
     {
@@ -399,33 +387,28 @@ const topicData = [
 ];
 
 // --- APP STATE ---
-let currentState = 'intro'; // intro, menu, topic
+let currentState = 'intro'; 
 let currentTopicId = null;
-let questionDeck = []; // Array of indices for current topic
+let questionDeck = []; 
 let currentQ = null;
 let introStep = 0;
 let isListening = false;
 let recognition;
 let synth = window.speechSynthesis;
 let voices = [];
+let speechQueue = []; // New queue for smooth speech
+let isSpeaking = false;
 
-// --- UTILS ---
 const getEl = (id) => document.getElementById(id);
 const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
-// --- INITIALIZATION ---
 window.onload = function() {
     loadVoices();
     renderDictionary();
-    // Removed auto-start intro timeout
-    // setTimeout(startIntro, 1000);
 };
 
-// --- START OVERLAY HANDLER ---
 function beginExperience() {
-    // Hide overlay
     getEl('startScreen').style.display = 'none';
-    // User interaction has occurred, audio context is unlocked
     startIntro();
 }
 
@@ -436,17 +419,42 @@ function loadVoices() {
     }
 }
 
-// --- CORE LOGIC ---
-
+// --- SMOOTH SPEECH ENGINE (FIX FOR MOBILE) ---
 function speak(text) {
-    if (synth.speaking) synth.cancel();
+    // 1. Create Utterance
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US';
-    // Friendly Female Voice Logic
     const preferred = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
     if (preferred) u.voice = preferred;
-    u.pitch = 1.1; // Friendly
-    u.rate = 0.9;  // Clear
+    u.pitch = 1.6;
+    u.rate = 0.9;
+
+    // 2. Add to Queue instead of cancelling
+    speechQueue.push(u);
+    processQueue();
+}
+
+function processQueue() {
+    if (isSpeaking || speechQueue.length === 0) return;
+
+    const u = speechQueue.shift();
+    isSpeaking = true;
+    
+    // 3. GC FIX: Assign to global window object
+    window.currentUtterance = u;
+    
+    u.onend = function() {
+        isSpeaking = false;
+        window.currentUtterance = null; // Clean up
+        processQueue(); // Play next
+    };
+
+    u.onerror = function() {
+        isSpeaking = false;
+        window.currentUtterance = null;
+        processQueue();
+    };
+
     synth.speak(u);
 }
 
@@ -460,10 +468,9 @@ function addMsg(text, type) {
     if (type === 'bot') speak(text);
 }
 
-// --- GAME FLOW ---
+// --- GAME LOGIC (Rest same as V4) ---
 
 function startIntro() {
-    // --- UPDATED INTRO HERE ---
     const introQs = [
         { q: "Hello! I am Mr Reyy's assistant. What is your name?", ex: "My name is...", key: ["name","is","am","call"], loose: true },
         { q: "Nice to meet you! How are you?", ex: "I am happy.", key: ["happy","good","great","sad","ok","fine"], loose: true },
@@ -472,7 +479,6 @@ function startIntro() {
     
     if (introStep < introQs.length) {
         currentQ = introQs[introStep];
-        // For intro, we fake the object structure slightly
         currentQ.pos = currentQ.key; 
         currentQ.neg = []; 
         
@@ -485,7 +491,7 @@ function startIntro() {
 
 function showMenu() {
     currentState = 'menu';
-    getEl('controls').style.transform = "translateY(100px)"; // Hide controls slightly
+    getEl('controls').style.transform = "translateY(100px)"; 
     
     const box = getEl('chatbox');
     const menuDiv = document.createElement('div');
@@ -512,14 +518,13 @@ function showMenu() {
 function loadTopic(topic) {
     currentState = 'topic';
     currentTopicId = topic;
-    getEl('controls').style.transform = "translateY(0)"; // Show controls
+    getEl('controls').style.transform = "translateY(0)";
     
-    // Shuffle questions logic
     questionDeck = [...Array(topic.qs.length).keys()];
-    // Simple shuffle
     questionDeck.sort(() => Math.random() - 0.5);
     
     addMsg(`Let's talk about ${topic.name}!`, 'bot');
+    // Using simple timeout to separate logic, but speech queue handles voice
     setTimeout(nextQuestion, 1500);
 }
 
@@ -537,12 +542,9 @@ function nextQuestion() {
     getEl('hintText').innerText = currentQ.ex;
 }
 
-// --- INPUT & VALIDATION ---
-
 function toggleMic() {
     if (!recognition) initSpeech();
     if (!recognition) return;
-    
     if (isListening) recognition.stop();
     else recognition.start();
 }
@@ -565,7 +567,7 @@ function initSpeech() {
         isListening = false;
         getEl('micBtn').classList.remove('listening');
         getEl('status').innerText = "Processing...";
-        getEl('status').style.color = "#FBC02D"; // Yellow processing
+        getEl('status').style.color = "#FBC02D";
     };
     
     recognition.onresult = (e) => processResult(e.results[0][0].transcript);
@@ -578,10 +580,8 @@ async function processResult(text) {
 
     const lower = text.toLowerCase();
     
-    // 1. Check Negative Context (Fluency Pass)
     const isNeg = currentQ.neg.some(k => lower.includes(k));
     if (isNeg) {
-        // Empathetic response
         await delay(500);
         addMsg(currentQ.rNeg || "I understand.", 'bot');
         await delay(2000);
@@ -589,10 +589,9 @@ async function processResult(text) {
         return;
     }
     
-    // 2. Check Positive Context (Accuracy Pass)
     let isPos = false;
     if (currentQ.loose) {
-        isPos = text.length > 2; // For name intro
+        isPos = text.length > 2;
     } else {
         isPos = currentQ.pos.some(k => lower.includes(k));
     }
@@ -607,7 +606,6 @@ async function processResult(text) {
     } else {
         await delay(500);
         addMsg("Almost! Try saying: " + currentQ.ex, 'bot');
-        // Do not advance, must retry
     }
 }
 
@@ -620,8 +618,6 @@ function advance() {
     }
 }
 
-// --- DICTIONARY ---
-
 function toggleDict() {
     const m = getEl('dictModal');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
@@ -630,7 +626,6 @@ function toggleDict() {
 function renderDictionary() {
     const list = getEl('dictList');
     list.innerHTML = '';
-    // Sort keys alphabetically
     Object.keys(rawDict).sort().forEach(en => {
         const row = document.createElement('div');
         row.className = 'word-row';
@@ -651,7 +646,6 @@ function filterDict() {
 function playHint() {
     speak(getEl('hintText').innerText);
 }
-
 </script>
 </body>
 </html>
